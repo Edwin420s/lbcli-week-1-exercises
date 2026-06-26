@@ -1,1 +1,2 @@
-# Generate a Taproot address.
+#!/bin/bash
+bitcoin-cli -regtest -rpcwallet=builderswallet getnewaddress "" taproot
