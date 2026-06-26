@@ -177,11 +177,18 @@ check_cmd "Getting address info"
 
 # STUDENT TASK: Extract the internal key (the x-only pubkey) from the descriptor
 # WRITE YOUR SOLUTION BELOW:
-INTERNAL_KEY=$(echo "$ADDR_INFO" | jq -r '.pubkey' 2>/dev/null)
-if [ -z "$INTERNAL_KEY" ]; then
-  # Fallback: extract from descriptor field
-  INTERNAL_KEY=$(echo "$ADDR_INFO" | jq -r '.descriptor' 2>/dev/null | sed 's/tr(\([^)]*\)).*/\1/')
-fi
+INTERNAL_KEY=$(echo "$ADDR_INFO" | python3 -c "
+import sys, json, re
+data = json.load(sys.stdin)
+key = data.get('pubkey', '')
+if not key:
+    desc = data.get('descriptor', '')
+    # Extract key from tr(key) pattern
+    match = re.search(r'tr\(([^,)]+)\)', desc)
+    if match:
+        key = match.group(1)
+print(key if key else '')
+")
 check_cmd "Extracting key from descriptor"
 INTERNAL_KEY=$(trim "$INTERNAL_KEY")
 
@@ -193,7 +200,7 @@ echo "Simple descriptor: $SIMPLE_DESCRIPTOR"
 
 # STUDENT TASK: Get a proper descriptor with checksum
 # WRITE YOUR SOLUTION BELOW:
-TAPROOT_DESCRIPTOR=$(bitcoin-cli -regtest getdescriptorinfo "$SIMPLE_DESCRIPTOR" 2>/dev/null | jq -r '.descriptor' 2>/dev/null)
+TAPROOT_DESCRIPTOR=$(bitcoin-cli -regtest getdescriptorinfo "$SIMPLE_DESCRIPTOR" 2>/dev/null | python3 -c "import sys, json; print(json.load(sys.stdin).get('descriptor', ''))" 2>/dev/null)
 check_cmd "Descriptor generation"
 TAPROOT_DESCRIPTOR=$(trim "$TAPROOT_DESCRIPTOR")
 echo "Taproot treasure map: $TAPROOT_DESCRIPTOR"
