@@ -1,1 +1,2 @@
-# Write the bitcoin cli command to get the bitcoin node network name
+#!/bin/bash
+bitcoin-cli -regtest getblockchaininfo | grep '"chain"' | cut -d'"' -f4
