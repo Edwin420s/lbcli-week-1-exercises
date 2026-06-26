@@ -1,2 +1,2 @@
 #!/bin/bash
-bitcoin-cli -regtest -rpcwallet=builderswallet getnewaddress "" taproot
+bitcoin-cli -regtest -rpcwallet=builderswallet getnewaddress "" bech32m

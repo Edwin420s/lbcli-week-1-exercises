@@ -70,7 +70,7 @@ check_cmd "P2SH address generation"
 SEGWIT_ADDR=$(bitcoin-cli -regtest -rpcwallet=btrustwallet getnewaddress "" bech32)
 check_cmd "SegWit address generation"
 
-TAPROOT_ADDR=$(bitcoin-cli -regtest -rpcwallet=btrustwallet getnewaddress "" taproot)
+TAPROOT_ADDR=$(bitcoin-cli -regtest -rpcwallet=btrustwallet getnewaddress "" bech32m)
 check_cmd "Taproot address generation"
 
 echo "Your exploration addresses:"
@@ -166,7 +166,7 @@ echo "Create a descriptor for your taproot address and derive the address to ens
 
 # STUDENT TASK: Create a new taproot address
 # WRITE YOUR SOLUTION BELOW:
-NEW_TAPROOT_ADDR=$(bitcoin-cli -regtest -rpcwallet=btrustwallet getnewaddress "" taproot)
+NEW_TAPROOT_ADDR=$(bitcoin-cli -regtest -rpcwallet=btrustwallet getnewaddress "" bech32m)
 check_cmd "New taproot address generation"
 NEW_TAPROOT_ADDR=$(trim "$NEW_TAPROOT_ADDR")
 
