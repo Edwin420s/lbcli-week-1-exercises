@@ -177,9 +177,31 @@ check_cmd "Getting address info"
 
 # STUDENT TASK: Extract the internal key (the x-only pubkey) from the descriptor
 # WRITE YOUR SOLUTION BELOW:
-# Get the descriptor directly from address info
+# Try to get descriptor from address info first
 TAPROOT_DESCRIPTOR=$(echo "$ADDR_INFO" | python3 -c "import sys, json; print(json.load(sys.stdin).get('descriptor', ''))" 2>/dev/null)
-check_cmd "Getting descriptor from address info"
+
+# If empty, try listdescriptors
+if [ -z "$TAPROOT_DESCRIPTOR" ]; then
+  DESCRIPTORS=$(bitcoin-cli -regtest -rpcwallet=btrustwallet listdescriptors 2>/dev/null)
+  TAPROOT_DESCRIPTOR=$(echo "$DESCRIPTORS" | python3 -c "
+import sys, json
+data = json.load(sys.stdin)
+if 'descriptors' in data:
+    for desc in data['descriptors']:
+        if 'tr(' in desc.get('desc', ''):
+            print(desc['desc'])
+            break
+" 2>/dev/null)
+fi
+
+# If still empty, create a simple descriptor from the address info
+if [ -z "$TAPROOT_DESCRIPTOR" ]; then
+  # Use the descriptor from the original taproot address
+  ORIGINAL_ADDR_INFO=$(bitcoin-cli -regtest -rpcwallet=btrustwallet getaddressinfo "$TAPROOT_ADDR" 2>/dev/null)
+  TAPROOT_DESCRIPTOR=$(echo "$ORIGINAL_ADDR_INFO" | python3 -c "import sys, json; print(json.load(sys.stdin).get('descriptor', ''))" 2>/dev/null)
+fi
+
+check_cmd "Getting descriptor"
 TAPROOT_DESCRIPTOR=$(trim "$TAPROOT_DESCRIPTOR")
 echo "Taproot treasure map: $TAPROOT_DESCRIPTOR"
 
